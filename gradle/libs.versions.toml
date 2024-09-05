@@ -11,6 +11,7 @@ composeBom = "2024.08.00"
 hiltVersion = "2.50"
 kspVersion = "1.9.22-1.0.17"
 coroutineVersion = "1.8.1"
+retrofitVersion = "2.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,6 +35,8 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler" , version.
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutineVersion" }
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutineVersion" }
+# Retrofit 'com.squareup.retrofit2:retrofit:(insert latest version)'
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofitVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
