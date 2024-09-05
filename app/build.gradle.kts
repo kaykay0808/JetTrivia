@@ -70,6 +70,9 @@ dependencies {
     implementation(libs.coroutines.android)
     // Retrofit
     implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
