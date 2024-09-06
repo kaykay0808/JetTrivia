@@ -72,8 +72,6 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
 
-
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
