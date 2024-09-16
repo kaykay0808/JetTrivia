@@ -21,8 +21,6 @@ object AppModule {
     @Provides
     fun provideQuestionRepository(api: QuestionApi) = QuestionRepository(api)
 
-
-
     @Singleton
     @Provides
     fun provideQuestionApi(): QuestionApi {

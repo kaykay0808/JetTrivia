@@ -64,6 +64,7 @@ dependencies {
     // Dagger Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation)
     // Coroutines
     implementation(libs.kotlin.stdlib)
     implementation(libs.coroutines.core)
