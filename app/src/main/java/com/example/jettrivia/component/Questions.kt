@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,14 +46,29 @@ fun Questions(viewModel: QuestionsViewModel) {
     val questions = viewModel.data.value.data?.toMutableList()
     // Log.d("SIZE", "Questions: ${questions?.size}")
 
+    val questionIndex = remember {
+        mutableStateOf(0)
+    }
+
     if (viewModel.data.value.loading == true) {
         // A Loading circle
         CircularProgressIndicator()
         Log.d("Loading", "Questions: ....Loading....${viewModel.data.value}")
     } else {
+        val question = try {
+            questions?.get(questionIndex.value)
+        } catch (ex:Exception) {
+            null
+        }
         Log.d("Loading", "Questions: ....Loading Complete ${viewModel.data.value}")
         if (questions != null) {
-            QuestionDisplay(question = questions.last())
+            QuestionDisplay(
+                question = question!!,
+                questionIndex= questionIndex,
+                viewModel = viewModel
+            ) {
+                questionIndex.value += 1
+            }
         }
     }
 }
@@ -59,13 +77,14 @@ fun Questions(viewModel: QuestionsViewModel) {
 @Composable
 fun QuestionDisplay(
     question: QuestionItem,
-    // questionIndex: MutableState<Int>,
-    // viewModel: QuestionsViewModel,
+    questionIndex: MutableState<Int>,
+    viewModel: QuestionsViewModel,
     onNextClicked: (Int) -> Unit = {}
 ) {
     val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
     val choicesState = remember(question) { question.choices.toMutableList() }
-    val answerIndexChoiceState = remember(question) { mutableStateOf<Int?>(null) } // -> updateAnswer{it]
+    val answerIndexChoiceState =
+        remember(question) { mutableStateOf<Int?>(null) } // -> updateAnswer{it]
     val correctAnswerState = remember(question) { mutableStateOf<Boolean?>(null) }
     // When we click on the answer "choices".
     val updateAnswer: (Int) -> Unit = remember(question) {
@@ -82,8 +101,7 @@ fun QuestionDisplay(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(4.dp),
+            .fillMaxHeight(),
         color = AppColors.mDarkPurple
     ) {
         // All of items are going to lay out vertically (Downwards)
@@ -93,7 +111,7 @@ fun QuestionDisplay(
             verticalArrangement = Arrangement.Top, // From top to bottom
             horizontalAlignment = Alignment.Start // From left to right
         ) {
-            QuestionTracker()
+            QuestionTracker(counter = questionIndex.value)
             DrawDottedLine(pathEffect = pathEffect)
             // Question card
             Column {
@@ -106,7 +124,8 @@ fun QuestionDisplay(
                     fontWeight = FontWeight.Bold,
                     lineHeight = 22.sp,
                     color = AppColors.mOffWhite,
-                    text = question.question /** <= The Question Api*/
+                    text = question.question
+                    /** <= The Question Api*/
                 )
                 // Choices
                 choicesState.forEachIndexed { index, answerAlternativeChoicesText ->
@@ -151,9 +170,43 @@ fun QuestionDisplay(
                                 ),
                         )
                         Log.d("ANSWER-VALUE", "The answer value is ${answerIndexChoiceState.value}")
-                        // The user alternative choices:
-                        Text(text = answerAlternativeChoicesText)
+                        // The user alternative choices: answerAlternativeChoicesText
+                        val annotatedString = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontWeight = FontWeight.Light,
+                                    fontSize = 17.sp,
+                                    color = if (correctAnswerState.value == true && index == answerIndexChoiceState.value) {
+                                        Color.Green
+                                    } else if (correctAnswerState.value == false && index == answerIndexChoiceState.value) {
+                                        Color.Red
+                                    } else {
+                                        AppColors.mOffWhite
+                                    }
+                                )
+                            ) {
+                                append(answerAlternativeChoicesText)
+                                //Text(text = answerAlternativeChoicesText)
+                            }
+                        }
+                        Text(text = annotatedString)
                     }
+                }
+                Button(
+                    modifier = Modifier
+                        .padding(3.dp)
+                        .align(alignment = Alignment.CenterHorizontally),
+                    shape = RoundedCornerShape(34.dp),
+                    colors = ButtonDefaults.buttonColors(contentColor = AppColors.mLightGray),
+                    onClick = {onNextClicked(questionIndex.value)}
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(4.dp)
+                            ,
+                        color = AppColors.mOffWhite,
+                        fontSize = 17.sp,
+                        text = "NEXT")
                 }
             }
         }
