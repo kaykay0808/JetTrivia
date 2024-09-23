@@ -17,7 +17,6 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -51,7 +50,7 @@ fun Questions(viewModel: QuestionsViewModel) {
     } else {
         Log.d("Loading", "Questions: ....Loading Complete ${viewModel.data.value}")
         if (questions != null) {
-            QuestionDisplay(question = questions.first())
+            QuestionDisplay(question = questions.last())
         }
     }
 }
@@ -66,11 +65,17 @@ fun QuestionDisplay(
 ) {
     val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
     val choicesState = remember(question) { question.choices.toMutableList() }
-    val answerState = remember(question) { mutableStateOf<Int?>(null) }
+    val answerIndexChoiceState = remember(question) { mutableStateOf<Int?>(null) } // -> updateAnswer{it]
     val correctAnswerState = remember(question) { mutableStateOf<Boolean?>(null) }
+    // When we click on the answer "choices".
     val updateAnswer: (Int) -> Unit = remember(question) {
         {
-            answerState.value = it
+            // Check for the correct choice
+            // Answer state is set to the clicked Int/index (userAnswerState?)
+            // so if the index has the same value as the question.answer it will return false or true
+            answerIndexChoiceState.value = it
+            // it just mean the specific item in a list?
+            // correctAnswerState is just a boolean trigger
             correctAnswerState.value = choicesState[it] == question.answer
         }
     }
@@ -101,10 +106,10 @@ fun QuestionDisplay(
                     fontWeight = FontWeight.Bold,
                     lineHeight = 22.sp,
                     color = AppColors.mOffWhite,
-                    text = question.question
+                    text = question.question /** <= The Question Api*/
                 )
                 // Choices
-                choicesState.forEachIndexed { index, answerText ->
+                choicesState.forEachIndexed { index, answerAlternativeChoicesText ->
                     Row(
                         modifier = Modifier
                             .padding(3.dp)
@@ -112,29 +117,42 @@ fun QuestionDisplay(
                             .height(45.dp)
                             .border(
                                 width = 4.dp,
-                                brush = Brush.linearGradient(colors = listOf(AppColors.mOffDarkPurple, AppColors.mOffDarkPurple)),
+                                brush = Brush.linearGradient(
+                                    colors = listOf(
+                                        AppColors.mOffDarkPurple,
+                                        AppColors.mOffDarkPurple
+                                    )
+                                ),
                                 shape = RoundedCornerShape(15.dp)
                             )
-                            .clip(RoundedCornerShape(topStartPercent = 50, topEndPercent = 50, bottomEndPercent = 50, bottomStartPercent = 50))
+                            .clip(
+                                RoundedCornerShape(
+                                    topStartPercent = 50,
+                                    topEndPercent = 50,
+                                    bottomEndPercent = 50,
+                                    bottomStartPercent = 50
+                                )
+                            )
                             .background(Color.Transparent),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // selected is checking if our choices is the same as the answer
                         RadioButton(
                             modifier = Modifier.padding(start = 16.dp),
-                            selected = (answerState.value == index),
+                            selected = (answerIndexChoiceState.value == index),
+                            onClick = { updateAnswer(index) },
                             colors = RadioButtonDefaults
                                 .colors(
-                                    selectedColor = if (correctAnswerState.value == true && index == answerState.value) {
+                                    selectedColor = if (correctAnswerState.value == true && index == answerIndexChoiceState.value) {
                                         Color.Green.copy(alpha = 0.2f)
                                     } else {
                                         Color.Red.copy(alpha = 0.2f)
                                     }
                                 ),
-                            onClick = {updateAnswer(index)}
                         )
-                        Text(text = answerText)
-
+                        Log.d("ANSWER-VALUE", "The answer value is ${answerIndexChoiceState.value}")
+                        // The user alternative choices:
+                        Text(text = answerAlternativeChoicesText)
                     }
                 }
             }
