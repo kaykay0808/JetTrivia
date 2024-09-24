@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -47,16 +48,17 @@ fun Questions(viewModel: QuestionsViewModel) {
     // Log.d("SIZE", "Questions: ${questions?.size}")
 
     val questionIndex = remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
 
+    // Todo: Move this logic to the viewmodel
     if (viewModel.data.value.loading == true) {
         // A Loading circle
         CircularProgressIndicator()
         Log.d("Loading", "Questions: ....Loading....${viewModel.data.value}")
     } else {
         val question = try {
-            questions?.get(questionIndex.value)
+            questions?.get(questionIndex.intValue)
         } catch (ex:Exception) {
             null
         }
@@ -67,7 +69,7 @@ fun Questions(viewModel: QuestionsViewModel) {
                 questionIndex= questionIndex,
                 viewModel = viewModel
             ) {
-                questionIndex.value += 1
+                questionIndex.intValue += 1
             }
         }
     }
@@ -208,6 +210,7 @@ fun QuestionDisplay(
                         fontSize = 17.sp,
                         text = "NEXT")
                 }
+                // TODO make a back button to
             }
         }
     }
