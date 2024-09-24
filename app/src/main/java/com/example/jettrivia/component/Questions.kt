@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -20,6 +22,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +37,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,12 +46,15 @@ import com.example.jettrivia.model.QuestionItem
 import com.example.jettrivia.screens.QuestionsViewModel
 import com.example.jettrivia.util.AppColors
 
+// Todo: make the score decrement when making the wrong choice
+
 @Composable
 fun Questions(viewModel: QuestionsViewModel) {
     // The value is our Wrapper(DataOrException)
     val questions = viewModel.data.value.data?.toMutableList()
     // Log.d("SIZE", "Questions: ${questions?.size}")
 
+    // change to by instead of = so we can take the .value away
     val questionIndex = remember {
         mutableIntStateOf(0)
     }
@@ -59,14 +67,14 @@ fun Questions(viewModel: QuestionsViewModel) {
     } else {
         val question = try {
             questions?.get(questionIndex.intValue)
-        } catch (ex:Exception) {
+        } catch (ex: Exception) {
             null
         }
         Log.d("Loading", "Questions: ....Loading Complete ${viewModel.data.value}")
         if (questions != null) {
             QuestionDisplay(
                 question = question!!,
-                questionIndex= questionIndex,
+                questionIndex = questionIndex,
                 viewModel = viewModel
             ) {
                 questionIndex.intValue += 1
@@ -113,6 +121,7 @@ fun QuestionDisplay(
             verticalArrangement = Arrangement.Top, // From top to bottom
             horizontalAlignment = Alignment.Start // From left to right
         ) {
+            if(questionIndex.value >= 3 ) ShowProgress(score = questionIndex.value)
             QuestionTracker(counter = questionIndex.value)
             DrawDottedLine(pathEffect = pathEffect)
             // Question card
@@ -200,15 +209,15 @@ fun QuestionDisplay(
                         .align(alignment = Alignment.CenterHorizontally),
                     shape = RoundedCornerShape(34.dp),
                     colors = ButtonDefaults.buttonColors(contentColor = AppColors.mLightGray),
-                    onClick = {onNextClicked(questionIndex.value)}
+                    onClick = { onNextClicked(questionIndex.value) }
                 ) {
                     Text(
                         modifier = Modifier
-                            .padding(4.dp)
-                            ,
+                            .padding(4.dp),
                         color = AppColors.mOffWhite,
                         fontSize = 17.sp,
-                        text = "NEXT")
+                        text = "NEXT"
+                    )
                 }
                 // TODO make a back button to
             }
@@ -264,6 +273,72 @@ fun DrawDottedLine(
             )
         }
     )
+}
+
+@Preview
+@Composable
+fun ShowProgress(
+    score: Int = 12
+) {
+    val gradient = Brush.linearGradient(
+        listOf(
+            AppColors.progressBarColor,
+            AppColors.progressBarColor2
+        )
+    )
+    val progressFactor by remember(score) {
+        mutableFloatStateOf(score*0.005f)
+    }
+    Row(
+        modifier = Modifier
+            .padding(3.dp)
+            .fillMaxWidth()
+            .height(45.dp)
+            .background(Color.Transparent)
+            .clip(
+                RoundedCornerShape(
+                    topStartPercent = 50,
+                    topEndPercent = 50,
+                    bottomStartPercent = 50,
+                    bottomEndPercent = 50
+                )
+            )
+            .border(
+                width = 4.dp,
+                shape = RoundedCornerShape(34.dp),
+                brush = Brush
+                    .linearGradient(
+                        colors = listOf(AppColors.mLightPurple, AppColors.mLightPurple)
+                    )
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // The button is just the progressbar and not an actually button
+        Button(
+            modifier = Modifier
+                .fillMaxWidth(progressFactor)
+                .background(brush = gradient),
+            contentPadding = PaddingValues(1.dp),
+            onClick = {},
+            enabled = false,
+            elevation = null,
+            colors = buttonColors(
+                contentColor = Color.Transparent,
+                disabledContentColor = Color.Transparent
+            )
+        ) {
+            Text(
+                modifier = Modifier
+                    .clip(shape = RoundedCornerShape(23.dp))
+                    .fillMaxHeight(0.87f)
+                    .fillMaxWidth()
+                    .padding(6.dp),
+                color = AppColors.mOffWhite,
+                textAlign = TextAlign.Center,
+                text = (score*10).toString()
+            )
+        }
+    }
 }
 
 

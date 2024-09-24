@@ -13,4 +13,6 @@ object AppColors {
     val mLightBlue = Color(0xff127EEA)
     val mBrown = Color(0xff7f6749)
     val mBlue  = Color(0xff4b5f9e)
+    val progressBarColor = Color(0xFFF95075)
+    val progressBarColor2 = Color(0xFFBE6BE5)
 }
