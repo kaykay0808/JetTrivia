@@ -36,4 +36,8 @@ class QuestionsViewModel @Inject constructor(private val repository: QuestionRep
             }
         }
     }
+    // Getting the total max question
+    fun GetTotalQuestionSize() : Int {
+        return data.value.data?.toMutableList()?.size!!
+    }
 }
