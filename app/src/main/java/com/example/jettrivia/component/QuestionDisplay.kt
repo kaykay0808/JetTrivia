@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
@@ -24,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,70 +44,19 @@ import com.example.jettrivia.model.QuestionItem
 import com.example.jettrivia.screens.QuestionsViewModel
 import com.example.jettrivia.util.AppColors
 
-// Todo: make the score decrement when making the wrong choice
-
-@Composable
-fun Questions(viewModel: QuestionsViewModel) {
-    val questions = viewModel.data.value.data?.toMutableList()
-    // Log.d("SIZE", "Questions: ${questions?.size}")
-
-    // change to by instead of = so we can take the .value away
-    val questionIndex = remember {
-        mutableIntStateOf(0)
-    }
-    // Todo: Move this logic to the viewmodel
-    if (viewModel.data.value.loading == true) {
-        // A Loading circle
-        CircularProgressIndicator()
-        Log.d("Loading", "Questions: ....Loading....${viewModel.data.value}")
-    } else {
-        val question = try {
-            questions?.get(questionIndex.intValue)
-        } catch (ex: Exception) {
-            null
-        }
-        Log.d("Loading", "Questions: ....Loading Complete ${viewModel.data.value}")
-        if (questions != null) {
-            QuestionDisplay(
-                question = question!!,
-                questionIndex = questionIndex,
-                viewModel = viewModel
-            ) {
-                questionIndex.intValue += 1
-            }
-        }
-    }
-}
-
-// @Preview
 @Composable
 fun QuestionDisplay(
     question: QuestionItem,
     questionIndex: MutableState<Int>,
     viewModel: QuestionsViewModel,
-    onNextClicked: (Int) -> Unit = {}
+    pathEffect: PathEffect,
+    choicesState: List<String>,
+    answerIndexChoiceState: MutableState<Int?>,
+    correctAnswerState: MutableState<Boolean?>,
+    progressFactor: Float,
+    updateAnswer: (Int) -> Unit,
+    onNextClicked: (Int) -> Unit,
 ) {
-    val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
-    val choicesState = remember(question) { question.choices.toMutableList() }
-    val answerIndexChoiceState =
-        remember(question) { mutableStateOf<Int?>(null) } // -> updateAnswer{it]
-    val correctAnswerState = remember(question) { mutableStateOf<Boolean?>(null) }
-    // When we click on the answer "choices".
-    val updateAnswer: (Int) -> Unit = remember(question) {
-        {
-            // Check for the correct choice
-            // Answer state is set to the clicked Int/index (userAnswerState?)
-            // so if the index has the same value as the question.answer it will return false or true
-            answerIndexChoiceState.value = it
-            // it just mean the specific item in a list?
-            // correctAnswerState is just a boolean trigger
-            correctAnswerState.value = choicesState[it] == question.answer
-        }
-    }
-    // figure out where score comes from -> it is from the parameter
-    val progressFactor by remember(questionIndex.value) {
-        mutableFloatStateOf(questionIndex.value * 0.005f)
-    }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -361,4 +308,3 @@ private fun NextButton(
         }
     }
 }
-
