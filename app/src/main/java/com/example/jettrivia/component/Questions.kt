@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.RadioButton
@@ -50,7 +50,6 @@ import com.example.jettrivia.util.AppColors
 
 @Composable
 fun Questions(viewModel: QuestionsViewModel) {
-    // The value is our Wrapper(DataOrException)
     val questions = viewModel.data.value.data?.toMutableList()
     // Log.d("SIZE", "Questions: ${questions?.size}")
 
@@ -58,7 +57,6 @@ fun Questions(viewModel: QuestionsViewModel) {
     val questionIndex = remember {
         mutableIntStateOf(0)
     }
-
     // Todo: Move this logic to the viewmodel
     if (viewModel.data.value.loading == true) {
         // A Loading circle
@@ -108,6 +106,10 @@ fun QuestionDisplay(
             correctAnswerState.value = choicesState[it] == question.answer
         }
     }
+    // figure out where score comes from -> it is from the parameter
+    val progressFactor by remember(questionIndex.value) {
+        mutableFloatStateOf(questionIndex.value * 0.005f)
+    }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -121,7 +123,12 @@ fun QuestionDisplay(
             verticalArrangement = Arrangement.Top, // From top to bottom
             horizontalAlignment = Alignment.Start // From left to right
         ) {
-            if(questionIndex.value >= 3 ) ShowProgress(score = questionIndex.value)
+            if (questionIndex.value >= 3) {
+                ShowProgress(
+                    score = questionIndex.value,
+                    progressFactor = progressFactor
+                )
+            }
             QuestionTracker(counter = questionIndex.value, total = viewModel.GetTotalQuestionSize())
             DrawDottedLine(pathEffect = pathEffect)
             // Question card
@@ -136,7 +143,6 @@ fun QuestionDisplay(
                     lineHeight = 22.sp,
                     color = AppColors.mOffWhite,
                     text = question.question
-                    /** <= The Question Api*/
                 )
                 // Choices
                 choicesState.forEachIndexed { index, answerAlternativeChoicesText ->
@@ -203,22 +209,11 @@ fun QuestionDisplay(
                         Text(text = annotatedString)
                     }
                 }
-                Button(
-                    modifier = Modifier
-                        .padding(3.dp)
-                        .align(alignment = Alignment.CenterHorizontally),
-                    shape = RoundedCornerShape(34.dp),
-                    colors = ButtonDefaults.buttonColors(contentColor = AppColors.mLightGray),
-                    onClick = { onNextClicked(questionIndex.value) }
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(4.dp),
-                        color = AppColors.mOffWhite,
-                        fontSize = 17.sp,
-                        text = "NEXT"
-                    )
-                }
+                // The next button
+                NextButton(
+                    onNextClicked = onNextClicked,
+                    questionIndex = questionIndex
+                )
                 // TODO make a back button to
             }
         }
@@ -275,9 +270,9 @@ fun DrawDottedLine(
     )
 }
 
-@Preview
 @Composable
 fun ShowProgress(
+    progressFactor: Float,
     score: Int = 12
 ) {
     val gradient = Brush.linearGradient(
@@ -286,9 +281,6 @@ fun ShowProgress(
             AppColors.progressBarColor2
         )
     )
-    val progressFactor by remember(score) {
-        mutableFloatStateOf(score*0.005f)
-    }
     Row(
         modifier = Modifier
             .padding(3.dp)
@@ -335,10 +327,38 @@ fun ShowProgress(
                     .padding(6.dp),
                 color = AppColors.mOffWhite,
                 textAlign = TextAlign.Center,
-                text = (score*10).toString()
+                text = (score * 10).toString()
             )
         }
     }
 }
 
+@Composable
+private fun NextButton(
+    onNextClicked: (Int) -> Unit,
+    questionIndex: MutableState<Int>
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Button(
+            modifier = Modifier
+                .padding(3.dp)
+                .align(alignment = Alignment.Center),
+            //.align(alignment = Alignment.CenterHorizontally),
+            shape = RoundedCornerShape(34.dp),
+            colors = buttonColors(contentColor = AppColors.mLightGray),
+            onClick = { onNextClicked(questionIndex.value) }
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(4.dp),
+                color = AppColors.mOffWhite,
+                fontSize = 17.sp,
+                text = "NEXT"
+            )
+        }
+    }
+}
 
