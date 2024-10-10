@@ -1,15 +1,15 @@
 [versions]
-agp = "8.6.0"
-kotlin = "1.9.22"
+agp = "8.6.1"
+kotlin = "2.0.20"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.5" # 2.8.4
+lifecycleRuntimeKtx = "2.8.6" # 2.8.4
 activityCompose = "1.9.2"
-composeBom = "2024.09.00"
+composeBom = "2024.09.03"
 hiltVersion = "2.50"
-kspVersion = "1.9.22-1.0.17"
+kspVersion = "2.0.20-1.0.24" # "1.9.22-1.0.17"
 coroutineVersion = "1.8.1"
 retrofitVersion = "2.11.0"
 hiltNavigationVersion = "1.2.0"
@@ -47,5 +47,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 # Dagger Hilt
 kotlinAndroidKsp = { id = "com.google.devtools.ksp", version.ref ="kspVersion" }
 hiltAndroid = { id = "com.google.dagger.hilt.android", version.ref ="hiltVersion" }
+# Added this line for the compose compiler
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 

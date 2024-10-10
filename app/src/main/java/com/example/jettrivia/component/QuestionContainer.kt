@@ -15,17 +15,10 @@ import com.example.jettrivia.screens.QuestionsViewModel
 @Composable
 fun QuestionContainer(viewModel: QuestionsViewModel) {
     val questions = viewModel.data.value.data?.toMutableList()
-    // Log.d("SIZE", "Questions: ${questions?.size}")
-
-    // change to by instead of = so we can take the .value away
-    val questionIndex = remember {
-        mutableIntStateOf(0)
-    }
-    // Moving states here
+    val questionIndex = remember { mutableIntStateOf(0) }
     val pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f))
     val progressFactor by remember(questionIndex.intValue) { mutableFloatStateOf(questionIndex.intValue * 0.005f) }
 
-    // Todo: Move this logic to the viewmodel
     if (viewModel.data.value.loading == true) {
         // A Loading circle
         CircularProgressIndicator()
@@ -43,7 +36,6 @@ fun QuestionContainer(viewModel: QuestionsViewModel) {
             val correctAnswerState = remember(question) { mutableStateOf<Boolean?>(null) }
             val updateAnswer: (Int) -> Unit = remember(question) {
                 {
-                    // Check for the correct choice
                     // Answer state is set to the clicked Int/index (userAnswerState?)
                     // so if the index has the same value as the question.answer it will return false or true
                     answerIndexChoiceState.value = it
